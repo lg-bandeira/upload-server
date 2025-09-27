@@ -1,10 +1,11 @@
 services:
-  upload_server_db:
-    container_name: "upload-server"
-    image: "bitnami/postgresql:latest"
-    env_file:
-      - .env
+  pg:
+    image: bitnami/postgresql:latest
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=upload
     volumes:
       - "./docker:/docker-entrypoint-initdb.d"
