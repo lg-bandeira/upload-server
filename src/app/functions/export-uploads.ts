@@ -1,5 +1,6 @@
 import { db, pg } from '@/infra/db'
 import { schema } from '@/infra/db/schemas'
+import { uploadFileToStorage } from '@/infra/storage/upload-file-to-storage'
 import { type Either, makeRight } from '@/shared/either'
 import { stringify } from 'csv-stringify'
 import { ilike } from 'drizzle-orm'
@@ -72,5 +73,5 @@ export async function exportUploads(
 
   const [{ url }] = await Promise.all([uploadToStorage, convertToCSVPipeline])
 
-  return makeRight({ reportUrl: '' })
+  return makeRight({ reportUrl: url })
 }
