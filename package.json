@@ -14,7 +14,9 @@
     "db:migrate:test": "dotenv -e .env.test -- drizzle-kit migrate",
     "pretest": "pnpm run db:migrate:test",
     "pretest:watch": "pnpm run db:migrate:test",
-    "build": "tsup-node"
+    "build": "tsup-node",
+    "prestart": "pnpm run db:generate && pnpm run db:migrate",
+    "start": "node -r dotenv/config dist/infra/http/server.js"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +30,8 @@
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "dotenv": "^17.2.3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.896.0",
