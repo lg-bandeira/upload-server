@@ -3,7 +3,7 @@ name: upload-server pipe ECR
 on:
   push:
     branches:
-      - "main"
+      - "master"
 
 jobs:
   Build:
