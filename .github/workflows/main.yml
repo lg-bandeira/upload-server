@@ -11,28 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        id: checkout
         uses: actions/checkout@v4
 
       - name: Configure Node
-        id: configure-node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install pnpm
-        id: install-pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
 
       - name: Install dependencies
-        id: install-dependencies
-        run: |
-          pnpm install
+        run: pnpm install
 
       - name: Configure AWS Credentials
-        id: configure-aws-credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -44,37 +38,34 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
-        id: set-up-docker-buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Generate tag
         id: generate-tag
         run: |
+          # Use short SHA for image tagging
           SHA=$(echo $GITHUB_SHA | head -c7)
           echo "sha=$SHA" >> $GITHUB_OUTPUT
 
-      - name: Build and export image
+      - name: Build and Load Image for Scan
         uses: docker/build-push-action@v6
         with:
           context: .
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: |
-            ${{steps.login-ecr.outputs.registry}}/${{ vars.ECR_REPOSITORY }}:test
+          tags: ${{steps.login-ecr.outputs.registry}}/${{ vars.ECR_REPOSITORY }}:scan
 
       - name: Run Trivy scanner
-        id: run-trivy-scanner
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: "${{steps.login-ecr.outputs.registry}}/${{ vars.ECR_REPOSITORY }}:test"
+          image-ref: "${{steps.login-ecr.outputs.registry}}/${{ vars.ECR_REPOSITORY }}:scan"
           format: "table"
           ignore-unfixed: true
           vuln-type: "os,library"
-          severity: "CRITICAL,HIGH,MEDIUM,LOW"
+          severity: "CRITICAL,HIGH"
 
-      - name: Build and push the image to AWS ECR
-        id: build-and-push-the-image-to-aws-ecr
+      - name: Push Final Image to AWS ECR
         uses: docker/build-push-action@v6
         with:
           context: .
